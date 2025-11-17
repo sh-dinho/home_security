@@ -188,6 +188,7 @@ secret/
 **/venv/
 **/env/
 
+static/
 # Build artifacts anywhere
 **/build/
 **/dist/

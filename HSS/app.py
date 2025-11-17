@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask, render_template, Response
-from motion_ai import AIMotionDetector
+from motion import AIMotionDetector
 from sensors import SensorManager
 from database import init_db
 import cv2
