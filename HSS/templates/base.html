@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel Hub - {% block title %}{% endblock %}</title>
+    <!-- Load Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            /* Use Inter font for a clean, professional look */
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen">
+<!-- Main Navigation Bar -->
+<nav class="bg-gray-900 p-4 shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <a href="/" class="text-indigo-400 text-2xl font-extrabold tracking-wider transition-colors duration-200 hover:text-indigo-300">
+            🏠 Sentinel Hub
+        </a>
+        <div>
+            <!-- Navigation Links -->
+            <a href="/" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                   {% if request.path == '/' %} bg-gray-700 text-white {% endif %}">Dashboard</a>
+            <a href="/events" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                   {% if request.path == '/events' %} bg-gray-700 text-white {% endif %}">Event Log</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content Area -->
+<main class="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>
