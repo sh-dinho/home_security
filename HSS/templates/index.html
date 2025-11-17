@@ -1,10 +1,22 @@
 <!doctype html>
 <html>
 <head>
-    <title>DIY Home Security</title>
+    <title>DIY AI Home Security</title>
 </head>
 <body>
-<h1>DIY Home Security System</h1>
+<h1>Home Security AI Dashboard (Simulation)</h1>
+
+<h2>Live Video Feed</h2>
 <img src="{{ url_for('video_feed') }}" width="640" height="480">
+
+<h2>Sensor Status</h2>
+<ul>
+    {% for name, state in sensor_states.items() %}
+    <li>{{ name }}: {{ state }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Event Log</h2>
+<a href="{{ url_for('events') }}">View Full Event History</a>
 </body>
 </html>
