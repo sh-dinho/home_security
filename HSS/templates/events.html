@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Logs</title>
+</head>
+<body>
+<h1>Event Log</h1>
+<table border="1">
+    <tr>
+        <th>Timestamp</th>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+    {% for timestamp, event_type, description in events %}
+    <tr>
+        <td>{{ timestamp }}</td>
+        <td>{{ event_type }}</td>
+        <td>{{ description }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+<a href="{{ url_for('index') }}">Back to Dashboard</a>
+
+</body>
+</html>
