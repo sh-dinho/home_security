@@ -39,7 +39,7 @@ sensor_manager = SensorManager()
 # Background thread for sensors
 def sensor_loop():
     """Periodically checks sensors and updates global state."""
-    global global_sensor_states
+    # global global_sensor_states
     while True:
         # Pass the current armed state to the sensor manager
         current_armed_state = get_armed_state()
