@@ -1,22 +1,93 @@
-<!doctype html>
-<html>
-<head>
-    <title>DIY AI Home Security</title>
-</head>
-<body>
-<h1>Home Security AI Dashboard (Simulation)</h1>
+{% extends "base.html" %}
 
-<h2>Live Video Feed</h2>
-<img src="{{ url_for('video_feed') }}" width="640" height="480">
+{% block title %}Dashboard{% endblock %}
 
-<h2>Sensor Status</h2>
-<ul>
-    {% for name, state in sensor_states.items() %}
-    <li>{{ name }}: {{ state }}</li>
-    {% endfor %}
-</ul>
+{% block content %}
 
-<h2>Event Log</h2>
-<a href="{{ url_for('events') }}">View Full Event History</a>
-</body>
-</html>
+<h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-3">Security Dashboard</h1>
+
+<div class="space-y-8">
+
+    <!-- System Status and Control Card -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-2xl border-t-4
+                {% if is_armed %} border-red-600 {% else %} border-green-600 {% endif %}">
+        <div class="mb-4 md:mb-0">
+            <p class="text-sm font-medium text-gray-600">SYSTEM STATUS</p>
+            <p class="text-4xl font-extrabold mt-1 tracking-wide
+                      {% if is_armed %}text-red-800{% else %}text-green-800{% endif %}">
+                {% if is_armed %} ARMED 🔒 {% else %} DISARMED ✅ {% endif %}
+            </p>
+        </div>
+
+        <!-- Button to toggle the armed state via POST request -->
+        <form id="armForm" method="POST" action="{{ url_for('arm_disarm') }}" class="w-full md:w-auto">
+            <button type="submit" class="w-full px-8 py-3 rounded-xl text-lg font-bold shadow-lg transition-all duration-300 transform hover:scale-[1.02]
+                {% if is_armed %}
+                    bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400
+                {% else %}
+                    bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400
+                {% endif %}">
+                {% if is_armed %} DISARM SYSTEM {% else %} ARM SYSTEM {% endif %}
+            </button>
+        </form>
+    </div>
+
+    <!-- Sensor Status Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% if sensor_states %}
+        {% for name, state in sensor_states.items() %}
+        <div class="p-6 rounded-xl shadow-lg transition-all duration-300 border-l-4
+                        {% if state == 'open' %}bg-red-50 border-red-500{% else %}bg-green-50 border-green-500{% endif %}">
+            <p class="text-sm font-medium text-gray-600">{{ name }}</p>
+            <p class="text-3xl font-extrabold mt-1
+                          {% if state == 'open' %}text-red-800{% else %}text-green-800{% endif %}">
+                {{ state|upper }}
+            </p>
+            <p class="text-xs mt-2 text-gray-500">Last checked: <span class="last-checked-time">{{ now() }}</span></p>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-gray-500 md:col-span-3">Sensor manager is initializing... Please refresh in a moment.</p>
+        {% endif %}
+    </div>
+
+    <!-- Live Video Stream Card -->
+    <div class="bg-white rounded-xl shadow-2xl p-4">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Live Video Feed (Motion Detection)</h2>
+        <div class="bg-gray-900 rounded-lg overflow-hidden border-4
+            {% if is_armed %} border-red-500 {% else %} border-indigo-500 {% endif %} transition-all duration-300">
+            <!-- This image tag links to the Flask video streaming route. -->
+            <img src="{{ url_for('video_feed') }}"
+                 alt="Live Video Feed"
+                 class="w-full h-auto object-cover block"
+                 style="max-height: 80vh;"
+                 onerror="this.onerror=null;this.src='https://placehold.co/800x450/1f2937/FFFFFF?text=Stream+Unavailable';">
+        </div>
+        <p class="text-center text-sm text-gray-500 mt-3">
+            Motion is
+            {% if is_armed %}
+            <span class="font-bold text-red-600">actively monitored</span>.
+            {% else %}
+            <span class="font-bold text-gray-600">detected but not alerted</span>.
+            {% endif %}
+        </p>
+    </div>
+
+</div>
+
+<!-- Simple JS to update the 'Last checked' time every second -->
+<script>
+    function updateTime() {
+        const timeElements = document.querySelectorAll('.last-checked-time');
+        const now = new Date();
+        const timeString = now.toTimeString().split(' ')[0]; // Gets HH:MM:SS
+
+        timeElements.forEach(el => {
+            el.textContent = timeString;
+        });
+    }
+    // Update the time every second
+    setInterval(updateTime, 1000);
+</script>
+
+{% endblock %}
