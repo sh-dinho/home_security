@@ -3,161 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Home Security System Dashboard</title>
-    <!-- Load Tailwind CSS -->
+    <title>S&S Security - Dashboard V1.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'armed': '#dc2626',
+                        'disarmed': '#10b981',
+                        'bg-dark': '#0f172a',
+                        'card-dark': '#1e293b',
+                    },
+                }
+            }
+        }
+    </script>
     <style>
-        /* Custom Keyframe for Flashing Effect */
-        @keyframes flash {
-            0%, 100% { background-color: #f87171; } /* Red-400 */
-            50% { background-color: #ef4444; } /* Red-500 */
+        body {
+            font-family: 'Inter', sans-serif;
         }
-
-        /* Apply flash animation when the 'alert-mode' class is present */
-        .alert-mode {
-            animation: flash 0.5s ease-in-out infinite alternate;
+        .armed-bg {
+            background-color: #dc2626; /* red-600 */
         }
-
-        /* Custom scrollbar styling */
-        .custom-scroll::-webkit-scrollbar {
-            width: 8px;
+        .disarmed-bg {
+            background-color: #10b981; /* emerald-500 */
         }
-
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background-color: #6b7280; /* Gray-500 */
-            border-radius: 4px;
+        .status-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .sensor-status-card {
+            transition: transform 0.1s ease-in-out;
+        }
+        .sensor-status-card.open {
+            border-left: 5px solid #ef4444;
+        }
+        .sensor-status-card.closed {
+            border-left: 5px solid #10b981;
         }
     </style>
 </head>
+<body class="bg-bg-dark text-white min-h-screen p-4 sm:p-8">
 
-<body class="font-sans min-h-screen bg-gray-900 text-white transition-all duration-300 {% if is_alert %}alert-mode{% endif %}">
-
-<!-- Navigation -->
-<header class="bg-gray-800 shadow-lg sticky top-0 z-10">
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-extrabold text-indigo-400 tracking-wider">
-            Guardian AI
-        </h1>
-        <div class="space-x-4">
-            <a href="/" class="text-white hover:text-indigo-400 transition duration-150 font-medium">Dashboard</a>
-            <a href="/events" class="text-white hover:text-indigo-400 transition duration-150 font-medium">Event Log</a>
-        </div>
-    </nav>
+<!-- Header & Status -->
+<header class="mb-8 flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-gray-700">
+    <h1 class="text-3xl font-extrabold text-blue-400 mb-2 sm:mb-0">S&S Security Dashboard <span class="text-sm font-normal text-gray-400">(V1.0)</span></h1>
+    <div class="text-sm font-medium text-gray-400">
+        Current Time: <span id="current-time">{{ now }}</span>
+    </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<!-- Main Control & Video Stream -->
+<main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-    <!-- System Status Banner -->
-    <div class="mb-8 p-6 rounded-xl shadow-2xl transition-all duration-500
-            {% if is_alert %} bg-red-700/90 border-4 border-white/50 text-white font-black text-center text-3xl pulse-effect
-            {% elif is_armed %} bg-green-600/90 border-4 border-green-400
-            {% else %} bg-gray-700/80 border-4 border-gray-600
-            {% endif %}">
-        <p class="text-sm font-semibold opacity-80 mb-1">{{ now() }}</p>
-        {% if is_alert %}
-        <p class="animate-pulse">⚠️ CRITICAL ALERT: FIRE/SMOKE DETECTED! ⚠️</p>
-        {% else %}
-        <p class="text-4xl font-bold">SYSTEM STATUS: {{ 'ARMED' if is_armed else 'DISARMED' }}</p>
-        {% endif %}
-    </div>
+    <!-- Video Feed & Arm Control -->
+    <section class="lg:col-span-2 bg-card-dark rounded-xl shadow-2xl p-4 sm:p-6">
+        <h2 class="text-xl font-semibold mb-4 text-blue-300 flex items-center">
+            <i class="fas fa-video mr-2"></i> Live Video Feed
+        </h2>
 
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        <!-- Column 1: Video Feed & Controls -->
-        <div class="lg:col-span-2 space-y-8">
-
-            <!-- Video Stream Card -->
-            <div class="bg-gray-800 rounded-xl shadow-2xl p-4">
-                <h2 class="text-xl font-semibold mb-3 text-indigo-400">Live Video Feed (AI Motion Detection)</h2>
-                <div class="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden border-2 border-gray-700">
-                    <!-- Video Feed Image -->
-                    <img src="{{ url_for('video_feed') }}" class="w-full h-full object-cover" alt="Live Security Camera Feed">
-                    <!-- Armed Status Overlay -->
-                    <div class="absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold transition-colors duration-500
-                            {% if is_armed %} bg-red-600 text-white {% else %} bg-gray-500 text-white {% endif %}">
-                        {{ 'ARMED' if is_armed else 'DISARMED' }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Control Panel Card -->
-            <div class="bg-gray-800 rounded-xl shadow-2xl p-6">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-400">System Control</h2>
-                <form method="POST" action="{{ url_for('arm_disarm') }}" class="w-full">
-                    <button type="submit" class="w-full py-4 rounded-lg font-bold text-lg shadow-xl transition-all duration-300 transform hover:scale-[1.01]
-                            {% if is_armed %}
-                                bg-red-600 hover:bg-red-500 text-white border-b-4 border-red-700
-                            {% else %}
-                                bg-green-600 hover:bg-green-500 text-white border-b-4 border-green-700
-                            {% endif %}">
-                        {% if is_armed %}
-                        DISARM SYSTEM
-                        {% else %}
-                        ARM SYSTEM
-                        {% endif %}
-                    </button>
-                </form>
-                <p class="text-xs text-gray-400 mt-3 text-center">
-                    Toggle to arm or disarm the security motion and contact sensors. Critical alerts (like smoke) are always active.
-                </p>
-            </div>
+        <div class="w-full bg-gray-900 rounded-lg overflow-hidden shadow-inner mb-6 aspect-video">
+            <!-- Video Stream -->
+            <img src="{{ url_for('video_feed') }}" class="w-full h-full object-cover" alt="Live Security Feed">
         </div>
 
-        <!-- Column 2: Sensor Status -->
-        <div class="lg:col-span-1 bg-gray-800 rounded-xl shadow-2xl p-6 h-full">
-            <h2 class="text-xl font-semibold mb-4 text-indigo-400">Sensor Status Overview ({{ sensor_states|length }} Devices)</h2>
-
-            <div class="space-y-4 max-h-[800px] overflow-y-auto custom-scroll">
-                {% for name, state in sensor_states.items() %}
-                {% set is_open = 'open' in state.lower() or 'detected' in state.lower() %}
-                {% set is_critical = 'smoke' in name.lower() or 'fire' in name.lower() %}
-
-                <div class="p-4 rounded-lg flex justify-between items-center transition-all duration-300 border-l-4
-                            {% if is_critical and is_open %}
-                                bg-red-900 border-red-500 hover:bg-red-800
-                            {% elif is_open and is_armed %}
-                                bg-yellow-900 border-yellow-500 hover:bg-yellow-800
-                            {% else %}
-                                bg-gray-700 border-green-500 hover:bg-gray-600
-                            {% endif %}">
-
-                    <!-- Sensor Name and Status Icon -->
-                    <div class="flex items-center space-x-3">
-                                <span class="text-xl">
-                                    {% if is_critical %}
-                                        🔥
-                                    {% elif is_open %}
-                                        🚨
-                                    {% else %}
-                                        ✅
-                                    {% endif %}
-                                </span>
-                        <div>
-                            <p class="font-medium text-sm">{{ name }}</p>
-                            <p class="text-xs font-bold
-                                        {% if is_critical and is_open %} text-red-300 
-                                        {% elif is_open %} text-yellow-300 
-                                        {% else %} text-green-300 
-                                        {% endif %}">
-                                {{ state.upper() }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Status Indicator -->
-                    <span class="w-3 h-3 rounded-full
-                                {% if is_critical and is_open %} bg-red-500 animate-ping 
-                                {% elif is_open %} bg-yellow-500 
-                                {% else %} bg-green-500 
-                                {% endif %}">
-                            </span>
-                </div>
-                {% endfor %}
-            </div>
+        <!-- System Status Indicator -->
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-xl font-bold">System Status:</span>
+            <span id="arm-status-indicator" class="px-4 py-2 rounded-full font-bold uppercase text-white {{ 'armed-bg' if is_armed else 'disarmed-bg' }}">
+                    {{ 'ARMED' if is_armed else 'DISARMED' }}
+                </span>
         </div>
 
-    </div>
+        <!-- Arm/Disarm Button -->
+        <form method="POST" action="{{ url_for('arm_disarm') }}" class="w-full">
+            <button type="submit"
+                    class="status-button w-full text-white font-extrabold py-3 px-6 rounded-lg text-lg
+                        {{ 'bg-red-700 hover:bg-red-500' if is_armed else 'bg-green-700 hover:bg-green-500' }}">
+                {{ 'DISARM SYSTEM' if is_armed else 'ARM SYSTEM' }}
+            </button>
+        </form>
+
+        <a href="{{ url_for('events') }}" class="block mt-4 w-full text-center text-sm text-blue-400 hover:text-blue-200">
+            View Event Log
+        </a>
+    </section>
+
+    <!-- Sensor Status Summary -->
+    <section class="lg:col-span-1 bg-card-dark rounded-xl shadow-2xl p-4 sm:p-6">
+        <h2 class="text-xl font-semibold mb-4 text-blue-300 flex items-center">
+            <i class="fas fa-door-open mr-2"></i> Sensor Status
+        </h2>
+
+        <div class="space-y-4">
+            {% for sensor_name, state in sensor_states.items() %}
+            <div class="sensor-status-card p-4 rounded-lg shadow-md flex justify-between items-center
+                            {{ 'open bg-red-900/40' if state == 'open' else 'closed bg-green-900/40' }}">
+                <span class="font-medium text-gray-300">{{ sensor_name }}</span>
+                <span class="px-3 py-1 text-sm font-bold rounded-full
+                                 {{ 'bg-red-500 text-white' if state == 'open' else 'bg-green-500 text-white' }}">
+                        {{ state.upper() }}
+                    </span>
+            </div>
+            {% endfor %}
+
+            {% if not sensor_states %}
+            <p class="text-center text-gray-500 italic p-4">No sensors are currently active.</p>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg text-sm text-yellow-300">
+            <i class="fas fa-info-circle mr-2"></i>
+            Alerts are suppressed for Motion and Sensor events when the system is DISARMED.
+        </div>
+    </section>
 </main>
+
+<!-- Script to update time -->
+<script>
+    function updateTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // The hour '0' should be '12'
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+        document.getElementById('current-time').textContent = timeString;
+    }
+
+    // Update the time every second
+    setInterval(updateTime, 1000);
+</script>
 </body>
 </html>
