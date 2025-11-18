@@ -4,7 +4,7 @@ from database import log_event
 def get_armed_status():
     """Tries to access the armed status from the main application's state."""
     try:
-        # Import necessary components from the running app module
+        # Import necessary components from the running app module (using new variable names)
         from app import global_system_armed, system_state_lock
         with system_state_lock:
             return global_system_armed

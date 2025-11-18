@@ -1,45 +1,85 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S&S Security - Event Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bg-dark': '#0f172a',
+                        'card-dark': '#1e293b',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-white min-h-screen p-4 sm:p-8">
 
-{% block title %}Event Log{% endblock %}
+<!-- Header & Navigation -->
+<header class="mb-8 pb-4 border-b border-gray-700 flex justify-between items-center">
+    <h1 class="text-3xl font-extrabold text-blue-400">System Event Log</h1>
+    <a href="/" class="text-sm font-medium text-blue-400 hover:text-blue-200 flex items-center">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+    </a>
+</header>
 
-{% block content %}
-<h2 class="text-3xl font-bold text-gray-800 mb-6">Security Event Log</h2>
-
-<div class="bg-white p-6 rounded-xl shadow-2xl border-t-4 border-indigo-500">
+<!-- Event Table -->
+<div class="bg-card-dark rounded-xl shadow-2xl overflow-hidden">
     <div class="overflow-x-auto">
-        {% if events %}
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-gray-700">
+            <thead class="bg-gray-800">
             <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Timestamp
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Type
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Description
+                </th>
             </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-            <!-- Loop through all events (now using dict keys) -->
+            <tbody class="divide-y divide-gray-800">
             {% for event in events %}
-            <tr class="hover:bg-gray-100 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ event['timestamp'] }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <!-- Color-coded badge based on event type -->
-                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full
-                            {% if event['event_type'] == 'Motion' %} bg-yellow-100 text-yellow-800
-                            {% elif event['event_type'] == 'Sensor' %} bg-red-100 text-red-800
-                            {% else %} bg-blue-100 text-blue-800 {% endif %}">
-                            {{ event['event_type'] }}
-                        </span>
+            <tr class="hover:bg-gray-700/50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
+                    {{ event.timestamp }}
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-700 whitespace-normal break-words">{{ event['description'] }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if event.event_type == 'Motion' %} bg-red-600/50 text-red-300
+                                {% elif event.event_type == 'Sensor' %} bg-yellow-600/50 text-yellow-300
+                                {% elif event.event_type == 'System' %} bg-blue-600/50 text-blue-300
+                                {% else %} bg-gray-600/50 text-gray-300
+                                {% endif %}">
+                                {{ event.event_type }}
+                            </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-400">
+                    {{ event.description }}
+                </td>
             </tr>
             {% endfor %}
+            {% if not events %}
+            <tr>
+                <td colspan="3" class="px-6 py-4 text-center text-gray-500 italic">No events logged yet.</td>
+            </tr>
+            {% endif %}
             </tbody>
         </table>
-        <p class="mt-4 text-sm text-gray-500">Showing the last 100 recorded events.</p>
-        {% else %}
-        <p class="text-gray-500 p-4 text-center">No security events have been recorded yet.</p>
-        {% endif %}
     </div>
 </div>
-
-{% endblock %}
+</body>
+</html>
