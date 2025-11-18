@@ -1,0 +1,29 @@
+{
+  "sensors": [
+    {
+      "name": "Main Entrance Door",
+      "chance_to_open": 0.05,
+      "initial_state": "closed",
+      "critical": false
+    },
+    {
+      "name": "Kitchen Window Left",
+      "chance_to_open": 0.05,
+      "initial_state": "closed",
+      "critical": false
+    },
+    {
+      "name": "Master Bedroom Patio",
+      "chance_to_open": 0.03,
+      "initial_state": "closed",
+      "critical": false
+    },
+    {
+      "name": "Basement Smoke Detector",
+      "chance_to_open": 0.01,
+      "initial_state": "clear",
+      "critical": true,
+      "open_state": "smoke detected"
+    }
+  ]
+}

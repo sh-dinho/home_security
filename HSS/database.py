@@ -1,6 +1,6 @@
 import sqlite3
-from datetime import datetime
 import threading
+import time
 
 DB_FILE = "events.db"
 # CRITICAL: Lock for thread-safe database access
@@ -8,7 +8,9 @@ db_lock = threading.Lock()
 
 def get_db_connection():
     """Returns a new database connection with row factory enabled."""
-    conn = sqlite3.connect(DB_FILE, check_same_thread=True)
+    # check_same_thread=False is needed when connecting from multiple threads
+    # (like the sensor_loop and the Flask request handlers)
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     # Allows accessing columns by name (e.g., row['description'])
     conn.row_factory = sqlite3.Row
     return conn
@@ -25,10 +27,12 @@ def init_db():
                                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                                                             event_type TEXT,
                                                             description TEXT,
-                                                            timestamp TEXT
+                                                            # IMPROVEMENT: Use REAL for numeric timestamp
+                                                            timestamp REAL
                       )
                       ''')
             conn.commit()
+            print("[INFO] Database initialized successfully.")
         except sqlite3.Error as e:
             print(f"Database initialization error: {e}")
         finally:
@@ -42,7 +46,8 @@ def log_event(event_type, description):
         try:
             conn = get_db_connection()
             c = conn.cursor()
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Use a numeric timestamp for better sorting and queries
+            timestamp = time.time()
 
             c.execute('''
                       INSERT INTO events (event_type, description, timestamp)
